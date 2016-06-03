@@ -7,7 +7,7 @@ import br.ufrpe.pixengine.core.Renderer;
 public class GameManager extends AbstractGame {
     
 	public GameManager() {
-		push(new PlayState());
+		push(new ReadyState());
 	}
 	
 	@Override

@@ -6,11 +6,17 @@ import br.ufrpe.pixengine.core.Renderer;
 import javafx.scene.image.Image;
 
 
-public class Background extends GameObject{
+public class GameImage extends GameObject{
 	private Image background_image;
 	
 	
-	public Background(String background_path) {
+	public GameImage(String background_path, float x, float y) {
+		this.background_image = new Image(background_path);
+		this.x = x;
+		this.y = y;
+	}
+	
+	public GameImage(String background_path) {
 		this.background_image = new Image(background_path);
 	}
 
@@ -22,7 +28,7 @@ public class Background extends GameObject{
 
 	@Override
 	public void render(GameContainer gc, Renderer r) {
-		r.drawImage(this.background_image);
+		r.drawImage(this.background_image, this.x, this.y);
 	}
 
 	@Override

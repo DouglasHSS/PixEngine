@@ -16,7 +16,7 @@ public class GameContainer implements Runnable {
 	private int width = 320, height = 480;
 	private float scale = 1.0f;
 	private String title = "SnakeGame";
-	private double frameCap = 1.0 / 60.0;
+	private double frameCap = 1.5/60;
 	private boolean isRunning = false;
 
 	private boolean lockFrameRate = false;

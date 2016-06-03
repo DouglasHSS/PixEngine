@@ -1,5 +1,7 @@
 package br.ufrpe.pixengine.snake_game;
 
+import java.util.ArrayList;
+
 import br.ufrpe.pixengine.components.Collider;
 import br.ufrpe.pixengine.components.GameObject;
 import br.ufrpe.pixengine.core.GameContainer;
@@ -8,11 +10,11 @@ import br.ufrpe.pixengine.core.Renderer;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 
-public class SnakeHead extends GameObject {
+public class SnakeHead extends SnakeObject {
     private Image snake_head;
-    private KeyCode direction;
-    private float speed = 100;
-
+    private ArrayList<SnakeTailPart> snake_tail_array;
+    private float gap;
+    private boolean moved;
 
 	public SnakeHead(float x, float y) {
 		setTag("snake_head");
@@ -20,22 +22,71 @@ public class SnakeHead extends GameObject {
 		this.x = x;
 		this.y = y;
 		
-		this.snake_head = new Image("mr.nom/headleft.png"); 
-		this.w = (float) snake_head.getWidth();
-		this.h = (float) snake_head.getHeight();
+		this.old_x = x;
+		this.old_y = y;
 		
+		this.gap = 0;
+		
+		this.snake_head = new Image("mr.nom/headleft.png");
+		this.direction  = KeyCode.LEFT;
+		
+		this.w = (float) this.snake_head.getWidth();
+		this.h = (float) this.snake_head.getHeight();
+		
+		this.snake_tail_array = new ArrayList<SnakeTailPart>();
+
 		addComponent(new Collider());
 	}
 
-	@Override
-	public void update(GameContainer gc, float dt) {
-		Input game_input = gc.getInput();
-		
-		setHeadMovement(game_input);
-		movingSnake(dt);
-		checkBoundaries(gc);
-		
-		updateComponents(gc, dt);
+	/**
+	 * Função que que se encarregará de adicionar um novo  
+	 * SnakeTailPart.
+	 */
+	public void add_new_body_part(){
+		this.snake_tail_array.add(new SnakeTailPart());
+	}
+	
+	/**
+	 * Função para atualizar a direção da cabeça 
+	 * da cobra
+	 * 
+	 * @param game_input: Controlador de input do jogo
+	 */
+	private void updateHeadDiretion(Input game_input){
+		if (game_input.isKeyPressed(KeyCode.UP.ordinal())) {
+			this.setDirection(KeyCode.UP);
+		}else if (game_input.isKeyPressed(KeyCode.LEFT.ordinal())) {
+			this.setDirection(KeyCode.LEFT);
+		}else if (game_input.isKeyPressed(KeyCode.DOWN.ordinal())) {
+			this.setDirection(KeyCode.DOWN);
+		}else if (game_input.isKeyPressed(KeyCode.RIGHT.ordinal())) {
+			this.setDirection(KeyCode.RIGHT);
+		}
+	}
+	
+	/**
+	 * Função para atualizar a posição da cabeça da cobra.
+	 * 
+	 * @param dt
+	 */
+	private void movingSnakeHead(){
+		if (this.direction == KeyCode.UP) {
+			this.setX(this.x);
+			this.setY( this.y - this.w);
+			this.snake_head = new Image("mr.nom/headup.png");
+		}else if (this.direction == KeyCode.LEFT) {
+			this.setX(this.x - this.w);
+			this.setY(this.y);
+			this.snake_head = new Image("mr.nom/headleft.png");
+		}else if (this.direction == KeyCode.DOWN) {
+			this.setX(this.x);
+			this.setY(this.y + this.w);
+			this.snake_head = new Image("mr.nom/headdown.png");
+		}else if (this.direction == KeyCode.RIGHT) {
+			this.setX(this.x + this.w);
+			this.setY(this.y);
+			this.snake_head = new Image("mr.nom/headright.png");
+		}
 	}
 	
 	/**
@@ -44,7 +95,7 @@ public class SnakeHead extends GameObject {
 	 * 
 	 * @param gc
 	 */
-	public void checkBoundaries(GameContainer gc){
+	private void checkBoundaries(GameContainer gc){
 		float x_end = (float) (gc.getWidth() - this.snake_head.getWidth());	
 		if (this.x < 0){
 			this.setX(x_end);
@@ -60,60 +111,46 @@ public class SnakeHead extends GameObject {
 		}
 	}
 	
-	/**
-	 * Função para configurar o movimento que esta sendo
-	 * realizado pela cobra.
-	 * 
-	 * @param game_input: Controlador de input do jogo
-	 */
-	public void setHeadMovement(Input game_input){
-		if (game_input.isKeyPressed(KeyCode.UP.ordinal())) {
-			this.direction = KeyCode.UP;
-			this.snake_head = new Image("mr.nom/headup.png"); 
-		}else if (game_input.isKeyPressed(KeyCode.LEFT.ordinal())) {
-			this.direction = KeyCode.LEFT;
-			this.snake_head = new Image("mr.nom/headleft.png"); 
-		}else if (game_input.isKeyPressed(KeyCode.DOWN.ordinal())) {
-			this.direction = KeyCode.DOWN;
-			this.snake_head = new Image("mr.nom/headdown.png"); 
-		}else if (game_input.isKeyPressed(KeyCode.RIGHT.ordinal())) {
-			this.direction = KeyCode.RIGHT;
-			this.snake_head = new Image("mr.nom/headright.png"); 
+	@Override
+	public void update(GameContainer gc, float dt) {
+		if(this.isDead()){
+			gc.getGame().pop();
+			gc.getGame().push(new GameOverState());
+		}
+		this.gap += this.speed;
+		this.moved = false;
+		
+		Input game_input = gc.getInput();
+		this.updateHeadDiretion(game_input);
+		if (this.w <= (int)gap){
+			this.movingSnakeHead();
+			this.checkBoundaries(gc);
+			
+			this.gap = 0;
+			this.moved = true;
+		}
+		updateComponents(gc, dt);
+		for (SnakeTailPart tail_part : snake_tail_array) {
+			tail_part.updateComponents(gc, dt);
 		}
 	}
 	
-	/**
-	 * Função para atualizar a posição da cabeça da cobra dependendo
-	 * de sua direção e velocidade
-	 * 
-	 * @param dt
-	 */
-	public void movingSnake(float dt){
-		if (this.direction == KeyCode.UP) {
-			this.y -= dt * this.speed;
-		}else if (this.direction == KeyCode.LEFT) {
-			this.x -= dt * this.speed;
-		}else if (this.direction == KeyCode.DOWN) {
-			this.y += dt * this.speed;
-		}else if (this.direction == KeyCode.RIGHT) {
-			this.x += dt * this.speed;
-		}
-	}
-
 	@Override
 	public void render(GameContainer gc, Renderer r) {
 		r.drawImage(this.snake_head, this.x, this.y);
-	}
-
-	@Override
-	public void dispose() {
-
-	}
-
-	@Override
-	public void componentEvent(String name, GameObject object) {
-
+		
+		SnakeObject snake_part = this;
+		for (SnakeTailPart tail_part : snake_tail_array) {
+			if (moved){
+				tail_part.update_position(snake_part, moved);
+			}
+			tail_part.render(gc, r);
+			snake_part = tail_part;
+		}
 	}
 	
-
+	@Override
+	public void dispose() {}
+	@Override
+	public void componentEvent(String name, GameObject object) {}
 }
