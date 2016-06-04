@@ -36,13 +36,13 @@ public class Utils {
 	 * @param gc
 	 * @return int[]
 	 */
-	public static int[] randomicCoordenates(GameContainer gc, GameObject go){
+	public static int[] randomicCoordenates(float width, float height, GameObject go){
 		int[] coordenates = new int[2];
 		
-		int x_max = (int) (gc.getWidth() - go.getW());
+		int x_max = (int) (width - go.getW());
 		int randomic_x = randInt(0, x_max);
 		
-		int y_max = (int) (gc.getHeight() - go.getH());
+		int y_max = (int) (height - go.getH());
 		int randomic_y = randInt(0, y_max);
 		
 		coordenates[0] = randomic_x;

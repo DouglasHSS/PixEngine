@@ -11,17 +11,16 @@ import br.ufrpe.pixengine.core.Renderer;
 public class Trash extends GameObject {
     private Image trash;
     private ArrayList<Image> trashes_options;
-    private boolean can_set_up_new_trash;
     
 	public Trash() {
 		setTag("trash");
-		
-		this.can_set_up_new_trash = true;
 
 		this.trashes_options = new ArrayList<Image>();
 		this.trashes_options.add(new Image("mr.nom/stain1.png"));
 		this.trashes_options.add(new Image("mr.nom/stain2.png"));
-		this.trashes_options.add(new Image("mr.nom/stain3.png")); 
+		this.trashes_options.add(new Image("mr.nom/stain3.png"));
+		
+		this.updateTrashPosition();
 		
 		addComponent(new Collider());
 	}
@@ -29,17 +28,13 @@ public class Trash extends GameObject {
 	/**
 	 * Função para atualizar a posição do lixinho, randomicamente.
 	 */
-	private void setUpNewTrash(GameContainer gc){
-		if (this.can_set_up_new_trash) {
+	public void updateTrashPosition(){
 			this.changeTrashImage();
 			
-			int[] coodenates = Utils.randomicCoordenates(gc, this);
+			int[] coodenates = Utils.randomicCoordenates(320, 420, this);
 			
 			this.setX(coodenates[0]);
 			this.setY(coodenates[1]);
-			
-			this.can_set_up_new_trash = false;
-		}	
 	}
 	
 	/**
@@ -54,7 +49,6 @@ public class Trash extends GameObject {
 	
 	@Override
 	public void update(GameContainer gc, float dt) {
-		this.setUpNewTrash(gc);
 		updateComponents(gc, dt);
 	}
 
@@ -67,12 +61,8 @@ public class Trash extends GameObject {
 	public void componentEvent(String name, GameObject object) {
 		if (name.equalsIgnoreCase("collider")) {
 			if(object instanceof SnakeHead){
-				this.can_set_up_new_trash = true;
 				SnakeHead snake_head = (SnakeHead) object;
 				snake_head.add_new_body_part();
-			} else {
-				// caso o lixo cai em cima da SnakeTailPar renderiza outro;
-				this.can_set_up_new_trash = true;
 			}
 		}
 	}

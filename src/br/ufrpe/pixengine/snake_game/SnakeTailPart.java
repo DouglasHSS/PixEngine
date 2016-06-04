@@ -31,7 +31,13 @@ public class SnakeTailPart extends SnakeObject {
 	@Override
 	public void componentEvent(String name, GameObject object) { 
 		if (name.equalsIgnoreCase("collider")) {
-			object.setDead(true);
+			if(object instanceof SnakeHead){
+				object.setDead(true);
+			} 
+			else if(object instanceof Trash){
+				Trash trash = (Trash) object;
+				trash.updateTrashPosition();
+			}
 		}
 	}
 

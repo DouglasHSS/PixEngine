@@ -7,19 +7,18 @@ import br.ufrpe.pixengine.core.Input;
 import br.ufrpe.pixengine.core.Renderer;
 import javafx.scene.input.KeyCode;
 
-public class PlayState extends State {
-	public PlayState(int speed) {
-		manager.addObject(new GameImage("mr.nom/background_game.png"));
-		manager.addObject(new SnakeHead(126, 240, speed));
-		manager.addObject(new Trash());
+public class PauseState extends State {
+	public PauseState() {
+		manager.addObject(new GameImage("mr.nom/background.png"));
+		manager.addObject(new GameImage("mr.nom/pausemenu.png",50, 75));
 	}
 
 	@Override
 	public void update(GameContainer gc, float dt) {
 		Input game_input = gc.getInput();
-		if (game_input.isKeyPressed(KeyCode.ENTER.ordinal())) {
-			gc.getGame().push(new PauseState());
-		} 
+		if (game_input.isKeyPressed(KeyCode.BACK_SPACE.ordinal())) {
+			gc.getGame().pop();
+		}
 		manager.updateObjects(gc, dt);
 	}
 

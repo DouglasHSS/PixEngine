@@ -14,9 +14,9 @@ public class SnakeHead extends SnakeObject {
     private Image snake_head;
     private ArrayList<SnakeTailPart> snake_tail_array;
     private float gap;
-    private boolean moved;
+    private boolean has_moved;
 
-	public SnakeHead(float x, float y) {
+	public SnakeHead(float x, float y, int speed) {
 		setTag("snake_head");
 		
 		this.x = x;
@@ -24,6 +24,8 @@ public class SnakeHead extends SnakeObject {
 		
 		this.old_x = x;
 		this.old_y = y;
+		
+		this.speed = speed;
 		
 		this.gap = 0;
 		
@@ -117,17 +119,19 @@ public class SnakeHead extends SnakeObject {
 			gc.getGame().pop();
 			gc.getGame().push(new GameOverState());
 		}
+		
 		this.gap += this.speed;
-		this.moved = false;
+		this.has_moved = false;
 		
 		Input game_input = gc.getInput();
 		this.updateHeadDiretion(game_input);
+		
 		if (this.w <= (int)gap){
-			this.movingSnakeHead();
 			this.checkBoundaries(gc);
+			this.movingSnakeHead();
 			
 			this.gap = 0;
-			this.moved = true;
+			this.has_moved = true;
 		}
 		updateComponents(gc, dt);
 		for (SnakeTailPart tail_part : snake_tail_array) {
@@ -141,8 +145,8 @@ public class SnakeHead extends SnakeObject {
 		
 		SnakeObject snake_part = this;
 		for (SnakeTailPart tail_part : snake_tail_array) {
-			if (moved){
-				tail_part.update_position(snake_part, moved);
+			if (has_moved){
+				tail_part.update_position(snake_part, has_moved);
 			}
 			tail_part.render(gc, r);
 			snake_part = tail_part;
@@ -152,5 +156,12 @@ public class SnakeHead extends SnakeObject {
 	@Override
 	public void dispose() {}
 	@Override
-	public void componentEvent(String name, GameObject object) {}
+	public void componentEvent(String name, GameObject object) {
+		if (name.equalsIgnoreCase("collider")) {
+			if(object instanceof Trash){
+				Trash trash = (Trash) object;
+				trash.updateTrashPosition();
+			}
+		}
+	}
 }
